@@ -61,3 +61,6 @@ class UsersAPI(Resource):
         query = User.objects()
         users = User.objects().to_json()
         return Response(users, mimetype="application/json", status=200)
+
+
+# To do: user api to create admin user

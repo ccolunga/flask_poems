@@ -17,6 +17,8 @@ class User(db.Document):
 
     created_at = db.DateTimeField(default=datetime.utcnow)
 
+    is_admin = db.BooleanField(default=False)
+
 
 class Category(db.Document):
     name = db.StringField(required=True, unique=True)
