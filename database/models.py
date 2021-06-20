@@ -26,7 +26,7 @@ class Category(db.Document):
 
 class Comments(db.Document):
     body = db.StringField(required=True)
-    created = db.DateTimeField(require=True)
+    created = db.DateTimeField(default=datetime.utcnow)
     user = db.ReferenceField("User")
 
 
@@ -35,9 +35,7 @@ class Poems(db.Document):
     title = db.StringField(required=True, max_value=80)
     body = db.StringField(required=True)
     category = db.ReferenceField("Category", dbref="True")
-    comments = db.ListField(
-        db.ReferenceField("Comments", reverse_delete_rule=db.CASCADE)
-    )
+    comments = db.ListField(db.ReferenceField("Comments", reverse_delete_rule=db.PULL))
 
 
-# Comments.register_delete_rule(Poems, "comments", db.CASCADE)
+Comments.register_delete_rule(Poems, "comments", db.PULL)

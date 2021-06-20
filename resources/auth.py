@@ -1,8 +1,8 @@
-from flask import Response, request, session
+from flask import Response, session
 from flask_jwt_extended import create_access_token
 from mongoengine.queryset.transform import query
 from database.models import User
-from flask_restful import Resource
+from flask_restful import Resource, request
 import datetime
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist
 from resources.errors import (

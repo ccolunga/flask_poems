@@ -1,5 +1,5 @@
 from flask import Response, request
-from database.models import Poems, User, Comments, Category
+from database.models import Comments, Poems
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource
 from bson import ObjectId
@@ -19,6 +19,13 @@ from resources.errors import (
     DeletingMovieError,
     MovieNotExistsError,
 )
+
+
+def delete_comments(array):
+    for arr in array:
+        id = arr["id"]
+        comment = Comments.objects.get(id=id)
+        comment.delete()
 
 
 class PoemsAPI(Resource):
@@ -75,9 +82,17 @@ class PoemAPI(Resource):
         try:
             #      user_id = get_jwt_identity()
             poem = Poems.objects.get(id=id)
+
+            # print(f"poem.comments {poem.comments[0].id}")
+            delete_comments(poem.comments)
             poem.delete()
             return {"message": "Poem successfully deleted"}, 200
         except DoesNotExist:
             raise DeletingMovieError()
-        except Exception:
-            raise InternalServerError()
+        except Exception as e:
+            raise e  # InternalServerError()
+
+
+# class SearchPoemAPI(Resource):
+#     def get(self):
+#         args = request.args
