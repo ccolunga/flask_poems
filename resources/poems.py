@@ -1,7 +1,7 @@
 from flask import Response, request
 from database.models import Comments, Poems
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 from bson import ObjectId
 import re
 from mongoengine.errors import (
@@ -28,9 +28,16 @@ def delete_comments(array):
         comment.delete()
 
 
+def convert_body_str_to_object(body):
+    exp = "[a-z0-9]{24}"
+    for value in body:
+        if re.findall(exp, body[value]):
+            body[value] = ObjectId(body[value])
+    return body
+
+
 class PoemsAPI(Resource):
     def get(self):
-        query = Poems.objects()
         movies = Poems.objects().to_json()
         return Response(movies, mimetype="application/json", status=200)
 
@@ -64,11 +71,8 @@ class PoemAPI(Resource):
         try:
             body = request.get_json()
             poem = Poems.objects.get(id=id)
-            exp = "[a-z0-9]{24}"
-            for value in body:
-                if re.findall(exp, body[value]):
-                    body[value] = ObjectId(body[value])
-            poem.update(**body)
+            convert_body = convert_body_str_to_object(body)
+            poem.update(**convert_body)
             return {"id": str(poem.id), "message": "Poem updated successfully"}, 200
         except InvalidQueryError:
             raise SchemaValidationError()
@@ -80,10 +84,7 @@ class PoemAPI(Resource):
     # @jwt_required()
     def delete(self, id=None):
         try:
-            #      user_id = get_jwt_identity()
             poem = Poems.objects.get(id=id)
-
-            # print(f"poem.comments {poem.comments[0].id}")
             delete_comments(poem.comments)
             poem.delete()
             return {"message": "Poem successfully deleted"}, 200
@@ -93,6 +94,25 @@ class PoemAPI(Resource):
             raise e  # InternalServerError()
 
 
-# class SearchPoemAPI(Resource):
-#     def get(self):
-#         args = request.args
+class SearchPoemAPI(Resource):
+    def get(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument("q")
+            parser.add_argument("author")
+            args = parser.parse_args()
+            print(f'args["author"] -->>  {args["author"]}')
+            print(f'args["q"] -->>  {args["q"]}')
+            if args["author"] is not None:
+                author = args["author"]
+                poem = Poems.objects(author=author).to_json()
+                return Response(poem, mimetype="application/json", status=200)
+            else:
+                query = args["q"]
+                poem = Poems.objects.search_text(query).to_json()
+                return Response(poem, mimetype="application/json", status=200)
+        except Exception as e:
+            raise e
+            # else:
+
+            # poem = Poems.objects.find(title=q)

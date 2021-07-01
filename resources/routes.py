@@ -1,6 +1,6 @@
 from .auth import SignupApi, LoginApi, LogoutApi, UsersAPI
 from .reset_password import ForgotPassword, ResetPassword
-from .poems import PoemsAPI, PoemAPI
+from .poems import PoemsAPI, PoemAPI, SearchPoemAPI
 from .categories import CategoriesAPI, CategoryAPI
 from .comments import CommentAPI, CommentsAPI
 
@@ -9,6 +9,9 @@ def initialize_routes(api):
     # Poems
     api.add_resource(PoemsAPI, "/api/poems")
     api.add_resource(PoemAPI, "/api/poems/<id>")
+
+    # Search
+    api.add_resource(SearchPoemAPI, "/api/poems/search")
 
     # Comments
     api.add_resource(CommentsAPI, "/api/comments")

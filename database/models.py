@@ -37,5 +37,15 @@ class Poems(db.Document):
     category = db.ReferenceField("Category", dbref="True")
     comments = db.ListField(db.ReferenceField("Comments", reverse_delete_rule=db.PULL))
 
+    meta = {
+        "indexes": [
+            {
+                "fields": ["$title"],
+                "default_language": "spanish",
+                "weights": {"title": 10},
+            }
+        ]
+    }
+
 
 Comments.register_delete_rule(Poems, "comments", db.PULL)

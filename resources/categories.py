@@ -26,7 +26,6 @@ from resources.errors import (
 class CategoryAPI(Resource):
     # @jwt_required()
     def get(self):
-        query = Category.objects()
         category = Category.objects().to_json()
         return Response(category, mimetype="application/json", status=200)
 
